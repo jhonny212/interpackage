@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 @Component
-public class AddPermissions implements GatewayFilter {
+public class AddRoles implements GatewayFilter {
     @Value("${jwt.secret}")
     private String secret;
 
@@ -27,15 +27,15 @@ public class AddPermissions implements GatewayFilter {
         String token = headers.getFirst("Authorization").replace("Bearer ", "");
 
         try {
-            // Decodificar el token y obtener los permisos
+            // Decodificar el token y obtener los roles
             Claims claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
-            // Obtener la lista de permisos
-            List<String> nuevosPermisos = (List<String>) claims.get("permissions");
+            // Obtener la lista de roles
+            List<String> nuevosRoles = (List<String>) claims.get("roles");
 
-            // Crear un nuevo objeto HttpHeaders con las cabeceras originales y la cabecera "permisos" actualizada
+            // Crear un nuevo objeto HttpHeaders con las cabeceras originales y la cabecera "roles" actualizada
             HttpHeaders modifiedHeaders = new HttpHeaders();
             modifiedHeaders.addAll(headers);
-            modifiedHeaders.set("permissions", String.join(",", nuevosPermisos));
+            modifiedHeaders.set("roles", String.join(",", nuevosRoles));
 
             // Crear una copia mutable del intercambio y actualizar la solicitud original con las nuevas cabeceras
             ServerWebExchange modifiedExchange = exchange.mutate()

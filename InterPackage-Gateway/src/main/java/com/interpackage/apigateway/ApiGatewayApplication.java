@@ -1,6 +1,6 @@
 package com.interpackage.apigateway;
 
-import com.interpackage.apigateway.filter.AddPermissions;
+import com.interpackage.apigateway.filter.AddRoles;
 import com.interpackage.apigateway.filter.ValidateToken;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -18,7 +18,7 @@ public class ApiGatewayApplication {
 	}
 
 	@Bean
-	public RouteLocator customRouteLocator(RouteLocatorBuilder builder, AddPermissions addPermissions, ValidateToken validateToken) {
+	public RouteLocator customRouteLocator(RouteLocatorBuilder builder, AddRoles addPermissions, ValidateToken validateToken) {
 		return builder.routes()
 				//Ruta de autenticacion
 				.route("users-microservice-authenticate", r -> r.path("/user/authenticate") //ruta específica para autenticación
