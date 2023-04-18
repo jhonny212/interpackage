@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Event {
 
-    private String status;
-    private String message;
+    public String status;
+    public String message;
 
 }

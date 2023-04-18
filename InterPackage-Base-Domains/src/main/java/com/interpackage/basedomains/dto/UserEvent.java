@@ -9,5 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserEvent extends Event {
 
-    private User user;
+    public User user;
+
+
+
 }

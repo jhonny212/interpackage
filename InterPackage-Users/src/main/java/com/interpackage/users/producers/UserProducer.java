@@ -24,7 +24,6 @@ public class UserProducer {
     } 
     
     public void SendMessage(UserEvent event){
-        System.out.println("ACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
         LOGGER.info(String.format("UserEvent => %s", event.toString()));
         //Message
         Message<UserEvent> message = MessageBuilder
