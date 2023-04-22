@@ -32,7 +32,7 @@ public class LoginController {
 		AuthToken token = loginService.doLogin(authenticationRequest.getUser(), authenticationRequest.getPassword());
 		if (token != null) {
 
-			String key = "HOLA";
+			String key = authenticationRequest.getUser();
 			jwtRepository.save(key,new TokenCache(token.getAuthc(),expirationTime));
 			return ResponseEntity.ok(token);
 		}
