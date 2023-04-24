@@ -22,6 +22,8 @@
             <groupId>com.interpackage</groupId>
             <artifactId>base-domains</artifactId>
             <version>0.0.1-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/base-domains.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
