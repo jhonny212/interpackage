@@ -23,8 +23,8 @@ public class LoginController {
 	@Autowired
 	LoginService loginService;
 
-	@Autowired
-	JwtRepository jwtRepository;
+	//@Autowired
+	//JwtRepository jwtRepository;
 
 	@RequestMapping(value = "/authenticate", method = RequestMethod.POST)
 	public ResponseEntity<?> generateAuthenticationToken(@RequestBody UserCredential authenticationRequest)
@@ -32,8 +32,8 @@ public class LoginController {
 		AuthToken token = loginService.doLogin(authenticationRequest.getUser(), authenticationRequest.getPassword());
 		if (token != null) {
 
-			String key = authenticationRequest.getUser();
-			jwtRepository.save(key,new TokenCache(token.getAuthc(),expirationTime));
+			//String key = authenticationRequest.getUser();
+			//jwtRepository.save(key,new TokenCache(token.getAuthc(),expirationTime));
 			return ResponseEntity.ok(token);
 		}
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -43,10 +43,10 @@ public class LoginController {
 	public ResponseEntity<?> verifyToken()
 			throws Exception {
 		String key = "HOLA";
-		var exist = jwtRepository.exist(key);
+		/*var exist = jwtRepository.exist(key);
 		if(exist){
 			jwtRepository.updateExpiration(key);
-		}
+		}*/
 		return ResponseEntity.status(HttpStatus.OK).build();
 	}
 

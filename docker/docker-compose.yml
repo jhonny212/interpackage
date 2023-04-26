@@ -1,0 +1,124 @@
+version: '3.1'
+
+services:
+
+  postgres:
+    image: postgres:latest
+    restart: always
+    container_name: interpackage-postgresql-db
+    environment:
+      POSTGRES_DB: interpackage_users
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ../volume/postgresql-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:latest
+    container_name: interpackage-reddis-db
+    hostname: interpackage-reddis-db
+    ports:
+      - "6379:6379"
+
+  zookeeper:
+    image: 'bitnami/zookeeper:latest'
+    restart: always
+    container_name: interpackage-zookeeper
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    ports:
+      - '2181:2181'
+      - '2888:2888'
+      - '3888:3888'
+
+  kafka:
+    image: 'bitnami/kafka:latest'
+    restart: always
+    container_name: interpackage-kafka
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      
+    ports:
+      - '9092:9092'
+    depends_on:
+      - zookeeper
+
+  interpackage-service-discovery:
+    build:  ../InterPackage-Discovery-Server/
+    ports:
+      - "8761:8761"
+    depends_on:
+      - kafka
+
+  interpackage-service-user:
+    build:  ../InterPackage-Users/
+    ports:
+      - "0.0.0.0:8081:8081"
+    depends_on:
+      - postgres
+      - redis
+      - kafka
+
+    links:
+      - "interpackage-service-discovery"
+
+    env_file:
+      - .env
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${DB_USERS}
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_KAFKA_BOOTSTRAP-SERVERS= kafka:9092
+      - eureka.client.serviceUrl.defaultZone=http://interpackage-service-discovery:8761/eureka
+      - spring.kafka.producer.bootstrap-servers=kafka:9092
+
+    
+  interpackage-service-tracking:
+    build: ../InterPackage-Tracking/
+    ports:
+      - "0.0.0.0:8083:8083"
+
+    depends_on:
+      - postgres
+
+    links:
+      - "interpackage-service-discovery"
+
+    env_file:
+      - .env
+
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${DB_TRACKING}
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_KAFKA_BOOTSTRAP-SERVERS= kafka:9092
+      - eureka.client.serviceUrl.defaultZone=http://interpackage-service-discovery:8761/eureka
+
+  interpackage-service-notification:
+    build:  ../InterPackage-Notification/
+    ports:
+      - "0.0.0.0:8082:8082"
+    depends_on:
+      - postgres
+      - kafka
+
+    links:
+      - "interpackage-service-discovery"
+
+    env_file:
+      - .env
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${DB_NOTIFICATION}
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - eureka.client.serviceUrl.defaultZone=http://interpackage-service-discovery:8761/eureka
+      - SPRING_KAFKA_CONSUMER_GROUP_ID=email
+      - spring.kafka.consumer.bootstrap-servers=kafka:9092
